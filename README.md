@@ -1,4 +1,4 @@
-#Forecasting recycling glass growth in the city of Frankfurt
+# Forecasting recycling glass growth in the city of Frankfurt
 
 ## Kurze Projekt Beschreibung
 
