@@ -1,0 +1,13 @@
+# This file may be used to create an environment using:
+#pip install requirements.txt
+ipykernel
+numpy
+pandas
+scipy
+scikit-learn
+tslearn
+matplotlib
+seaborn
+tensorflow
+keras
+
