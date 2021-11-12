@@ -1,46 +1,46 @@
 # Forecasting recycling glass growth in the city of Frankfurt
 
-## Kurze Projekt Beschreibung
+## Short project description
 
 ### 🎯 Business Unterstanding
 
-Die Frankfurter  Entsorgungs- und Service GmbH hat 72 Glascontainer in Frankfurt mit entsprechender Sensorik ausgestattet. Hierbei werden Daten zum Füllstand, der Temperatur im Container sowie Neigungswinkel gesammelt.
+Frankfurter Entsorgungs- und Service GmbH has equipped 72 glass containers in Frankfurt with appropriate sensor technology. Data on the fill level, the temperature in the container and the angle of inclination are collected.
 
-Das Projekt befindet sich aktuell noch in einer Explorationsphase was in Folge bedeutet, dass es noch keinen standardisierten Ansatz gibt diese zu verwerten.
+The project is currently still in an exploratory phase, which means that there is no standardized approach to utilizing this data.
 
-Mithilfe der Daten soll ein effizienteres leeren der Container ermöglicht werden. Es gilt somit ein unterstützendes Prediktionsmodell zu entwickeln, welches Aussagen über das Füllverhalten der Container treffen kann.
+With the help of the data, a more efficient emptying of the containers should be possible. Therefore, a supporting prediction model has to be developed, which can make statements about the filling behavior of the containers.
 
 ## 📊 Data Understanding
 
-Bei den Daten handelt es sich um Zeitreihen, die aus der Beobachtung einzelner Variablen über einen Zeitraum entstehen. Die entscheide Variable **Höhe** wird dabei unterschiedlich oft beobachten allerdings im Schnitt mehrmals pro Tag. Da es sich dabei allerdings um EDGE Geräte handelt, sind einzelne Messungen nicht immer akkurat und zusätzlich sind häufig fehlende Daten zu beobachten. So können die Messungen für unterschiedliche Container stark varieren. Im folgenden Bild ist die Füllhöhe eines Containers über den bereitgestellten Zeitraum zu beobachten.
+The data are time series that result from the observation of individual variables over a period of time. The decisive variable **height** is observed with varying frequency, but on average several times per day. However, since these are EDGE devices, individual measurements are not always accurate and, in addition, missing data is common. Thus the quality of measurements for different containers can vary strongly. In the following picture the filling level of a container can be observed over the provided period.
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/brauchbar.png](doku_ressources/brauchbar.png)
 
 [DataVisualisation.ipynb](https://git.scc.kit.edu/uflgi/bda-analytics-challenge-template/-/blob/master/notebooks/DataVisualization.ipynb)
 
-Um Einflüsse auf den Füllstand besser zu verstehen, haben wir uns unterschiedliche Datenquellen aus dem Internet besorgt und diese mithilfe einer Korrelationsanalyse auf ihren Einfluss überprüft.
+To better understand influences on the filling level, we obtained different data sources from the Internet and tested them for their influence using a correlation analysis.
 
-Untersuchte Datenquellen:
+Data sources examined:
 
-☁️  Wetterdaten - Intuition: Tendenziell wird Glas eher bei gutem Wetter entsorgt als bei Regen. Wer verlässt schon gerne bei Regen das Haus?
+☁️  Weather data - intuition: glass tends to be disposed of more in good weather than in rain. Who likes to leave the house when it rains?
 
-🎉  Feiertage - Intuition: Über Feiertage kommen Menschen gerne zusammen, was zu einem vermehrten aufkommen Restglas führen könnte (Weinflaschen etc.)
+🎉  Holidays - intuition: Over holidays people like to get together, which could lead to an increased emergence residual glass (wine bottles, etc.)
 
-⚽  Fußballspiele & Großveranstaltungen - Intuition: Zu Fußballspielen und anderen Großveranstaltungen ist das Menschenaufkommen in der Stadt erhöht. Auch hier wird wieder vermehrt Alkohol konsumiert und evtl. direkt in auf dem Weg liegende Glascontainern entsorgt.
+⚽  Soccer matches & major events - intuition: The number of people in the city increases at soccer matches and other major events. Here, too, alcohol is increasingly consumed and possibly disposed of directly in glass containers lying on the way.
 
 [webscraper.ipynb](https://git.scc.kit.edu/uflgi/bda-analytics-challenge-template/-/blob/master/notebooks/webscraper.ipynb)
 
 ## 📈  Data Preparation
 
-Da Qualität der Vorhersagen des Modells direkt mit der Qualität der Trainingsdaten zusammenhängt, galt es die Daten möglichst gut für das Training vorzubereiten.
+Since the quality of the model's predictions is directly related to the quality of the training data, it was important to prepare the data as well as possible for training.
 
-Nachdem alle Containerfüllstände visualisiert wurden, wurden Container, deren Datenqualität extrem fragwürdig waren über eine deskriptive Analyse aussortiert. In den folgenden Plots sind jeweils ein Beispiel für einen Aussortierten (unten) und einen Weiterverwendeten (oben) zu sehen.
+After all container levels were visualized, containers whose data quality was extremely questionable were sorted out via descriptive analysis. The following plots show an example of a sorted out container (bottom) and a used container (top).
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/brauchbar%201.png](doku_ressources/brauchbar%201.png)
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/unbrauchbar.png](doku_ressources/unbrauchbar.png)
 
-In den weiteren Schritten wurden offensichtliche Messfehler in den Container entfernt z. B. Höhe > 190. Da in den Daten weiterhin sehr viel Noise enthalten ist galt es, denn unterliegenden Trend zu extrahieren. Hierbei wurden unterschiedliche Smoothing Verfahren angewandt. Im Code Snippet sowie in der Grafik unten wurde jeweils das Smoothing Verfahren des Rolling Average mit einer Fenstergröße von 30 visualisiert.
+In the next steps, obvious measurement errors were removed from the containers, e.g. height > 190. Since the data still contain a lot of noise, the underlying trend had to be extracted. Different smoothing methods were applied. In the code snippet as well as in the graphic below the smoothing method of the rolling average with a window size of 30 was visualized.
 
 ```python
 df['mov_avg'] = df['Height'].rolling(30).mean()
@@ -48,14 +48,14 @@ df['mov_avg'] = df['Height'].rolling(30).mean()
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/plot.png](doku_ressources/plot.png)
 
-Außerdem haben wir die Daten, nach dem erste Modellierungsversuche scheiterten, auf Tagesniveau mithilfe mean(), min() und max() Operators aggregiert. Dabei waren die Ergebnisse des mean() näher am Rohverlauf als die anderen, weshalb für das weitere Vorgehen diese Daten verwendet wurden. 
-Da bei den meisten Containern nicht für jeden Tag Messwerte existierten, haben wir fehlende Messwerte mithilfe von Interpolationsverfahren aufgefüllt.
+In addition, after initial modeling attempts failed, we aggregated the data at the daily level using mean(), min() and max() operators. In doing so, the mean() results were closer to the raw trend than the others, which is why this data was used for the rest of the procedure. 
+Since most containers did not have readings for each day, we filled in missing readings using interpolation techniques.
 
 ### 🌀 Clustering
 
-Da sich bei der deskriptiven Analyse zeigte, dass es visuelle Ähnlichkeiten zwischen den Zeitreihen gibt, wollte wir diese zu Clustern zusammenfassen und für jedes Cluster ein Modell trainieren um so die Güte der einzelnen und damit die gesamt Vorhersagequalität zu erhöhen. 
+Since the descriptive analysis showed that there are visual similarities between the time series, we wanted to group them into clusters and train a model for each cluster in order to increase the goodness of each and thus the overall prediction quality. 
 
-Dafür wurde Dynamic Time Warping in Kombination mit K-means Clustering eingesetzt. Dafür wurde die Bibliothek [tslearn](https://tslearn.readthedocs.io/en/stable/gen_modules/clustering/tslearn.clustering.TimeSeriesKMeans.html) verwendet. Dabei hat sich **k = 3** als effektivste Anzahl für die Cluster herauskristallisiert.
+Dynamic Time Warping in combination with K-means Clustering was used for this purpose. For this the library [tslearn](https://tslearn.readthedocs.io/en/stable/gen_modules/clustering/tslearn.clustering.TimeSeriesKMeans.html) was used. Here, **k = 3** emerged as the most effective number for the clusters.
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/clusters.png](doku_ressources/clusters.png)
 
@@ -71,19 +71,19 @@ Dafür wurde Dynamic Time Warping in Kombination mit K-means Clustering eingeset
 
 ### Lineare Regression als Baseline
 
-❗ Die wesentliche Problem für das Modellieren sind die eher schlechte Datenqualität sowie die wechselnden Standorte der Container.
+❗ The main problems for modeling are the rather poor data quality and the changing locations of the containers.
 
-Dabei macht es keinen Sinn die eigentlichen Kurven mit ihren jeweiligen Leerungsintervallen zu leeren, da ja gerade diese angepasst werden sollen.
+It does not make sense to empty the actual curves with their respective emptying intervals, since it is precisely these that are to be adjusted.
 
-Als Baseline haben wir versucht dies mithilfe einer einfachen linearen Regression zu modellieren. Dabei wurde jeweils aus einer Zeitreihe pro Cluster ein Füllintervall extrahiert und darauf die Steigung berechnet. Dies führte für diese recht einfache Methode auch zu sehr vielversprechenden Ergebnissen. Um die Ergebnisse zu evaluieren, haben wir versucht, die jeweiligen Leerungen mithilfe einer Schwellwertfunktion zu berechnen. Dies funktioniert auf unterschiedlichen Zeitreihen mit stark schwankendem Erfolg.
+As a baseline, we tried to model this using a simple linear regression. In each case, a fill interval was extracted from a time series per cluster and the slope was calculated on it. This also led to very promising results for this rather simple method. To evaluate the results, we tried to calculate the respective voids using a threshold function. This works on different time series with strongly varying success.
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/Screenshot_2021-07-24_at_17.14.01.png](doku_ressources/Screenshot_2021-07-24_at_17.14.01.png)
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/Untitled.png](doku_ressources/Untitled.png)
 
-Das Verfahren sieht auf den ersten Blick tatsächlich sehr vielsprechend aus, kann aber nicht optimal evaluiert werden, da in den Daten die Zeitpunkte der Leerung garnicht, bis sehr schlecht angegeben sind.
+At first glance, the procedure actually looks very appealing, but it cannot be optimally evaluated because the data do not specify the times of emptying at all, or very poorly.
 
-**Hierfür wären Daten notwendig, die die korrekten Leerungszeitpunkte enthalten.** 
+**This would require data that includes the correct emptying times.** 
 
 [linear_regression.ipynb](https://git.scc.kit.edu/uflgi/bda-analytics-challenge-template/-/blob/master/notebooks/performing_linear_regression.ipynb)
 
@@ -91,28 +91,28 @@ Das Verfahren sieht auf den ersten Blick tatsächlich sehr vielsprechend aus, ka
 
 ### LSTM
 
-Drei Ansätze für ein LSTM wurden verfolgt: 
-    1.   LSTM auf Basis eines Clusters mit Daten für jede Stunde (Notebook: Cluster0_LSTM.ipynb, Modell: 
-    2.   LSTM auf Basis aller Cluster mit Daten für jede Stunde (Notebook: Overall_LSTM.ipynb, Modell: 
-    3.   LSTM auf Basis aller Cluster mit Daten für jeden Tag (Notebook: Overall_grouped_LSTM.ipynb, Modell: 
+Three approaches for a LSTM were followed: 
+    1. LSTM based on a cluster with data for each hour (notebook: Cluster0_LSTM.ipynb, model: 
+    2. LSTM based on all clusters with data for each hour (Notebook: Overall_LSTM.ipynb, model: 
+    3rd LSTM based on all clusters with data for each day (Notebook: Overall_grouped_LSTM.ipynb, Model: 
     
-Nur Ansatz 3. erzeugt passende Vorhersagen: 
+Only approach 3. generates matching predictions: 
 
 ![Untitled%20dc564a8fe174488583651b8e230af1de/Overall_pred.png](doku_ressources/Overall_pred.png)
 
-Hierbei lernt das LSTM das Füllverhalten aller Container. Die Leerungen nehmen wir manuell vor, indem die Input Werte für das LSTM auf einen leeren Container zurückgesetzt werden, sobald der Füllstand bei mehreren Vorhersagen gleich bleibt.
+Here, the LSTM learns the filling behavior of all containers. We perform the emptying manually by resetting the input values for the LSTM to an empty container as soon as the fill level remains the same for several predictions.
 
-Dieser Ansatz wäre mit zusätzlichen Füllstandsdaten auch für einzelne Container möglich.
+This approach would also be possible for individual containers with additional fill level data.
 
 ## 🚀 Fazit/Future Work
 
-Die Lineare Regression trifft die Entwicklung des Füllstands in vielen Fällen bereits sehr gut, was dafür spricht, dass der Füllstand keiner komplexen Funktion folgt und daher in der Tendenz ein relativ einfach zu modellierender Trend zugrunde liegt.
+Linear regression already captures the development of the level very well in many cases, which indicates that the level does not follow a complex function and therefore tends to be based on a trend that is relatively easy to model.
 
-❗ Hierbei wurden allerdings keine Ausreißer Füllstände mit in Betracht gezogen. Um diese zu modellieren ist die Kapazität einer einfachen Regression nicht hoch genug. 
+❗ However, no outlier levels were taken into account. The capacity of a simple regression is not high enough to model these. 
 
-Der Engpass für die Evaluation ist hier klar der korrekte Zeitpunkt der Leerung. Mit unserer einfachen Schwellwertfunktion sind wir nicht sicher in der Lage diese zu genau genug zu approximieren.
+The bottleneck for the evaluation here is clearly the correct time of emptying. With our simple threshold function, we are not able to approximate this accurately enough.
 
-→ Zwar sagt die Sensor Dokumentation, dass diese enthalten seien sollten, dies konnten wir allerdings in den Daten nicht beobachten. Hierfür kann entweder der Sensor adjustiert werden oder um aus diesen Daten mehr zu machen, wäre unser Vorschlag einen Teil der Daten manuell zu Labeln und dann über ein Supervised Learning Verfahren ein Modell zu trainieren, dass in der Lage ist die Leerungszeitpunkte genauer anzugeben. Leider kam uns diese Idee zu spät und konnte im Rahmen dieses Projekts leider nicht mehr umgesetzt werden.
+→ The sensor documentation says that these should be included, but we could not observe this in the data. For this, either the sensor can be adjusted or to make more out of the data, we would suggest to manually label a part of the data and then train a model via supervised learning, which is able to specify the emptying times more precisely. Unfortunately, this idea came too late for us and could not be implemented within the scope of this project.
 
 
 
